@@ -1,1 +1,20 @@
-(empty)
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python environments and bytecode
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Runtime data and caches
+/data/**
+!/data/.gitkeep
+*.db
+*.sqlite
+*.sqlite3

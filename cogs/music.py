@@ -402,7 +402,18 @@ class Music(commands.Cog):
             'logtostderr': False,
             'default_search': 'auto',
             'source_address': '0.0.0.0',
-            'cachedir': False
+            'cachedir': False,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Referer': 'https://www.youtube.com/'
+            },
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['web', 'android']
+                }
+            }
         }
 
         self.download_ydl_opts = {
