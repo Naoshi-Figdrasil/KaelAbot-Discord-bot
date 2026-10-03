@@ -410,6 +410,9 @@ class Music(commands.Cog):
             'default_search': None,
             'noplaylist': True,
             'outtmpl': str(self.cache_dir / '%(id)s.%(ext)s'),
+            # Batasi kecepatan unduh & fragment download agar I/O disk server tetap stabil
+            'ratelimit': 800000,                # ~800 KB/s, mencegah bottleneck baca/tulis di VPS
+            'concurrent_fragment_downloads': 1, # satu fragmen saja per waktu, hindari contention disk
         }
         
         # FFmpeg options
@@ -1064,9 +1067,15 @@ class Music(commands.Cog):
                     await self.play_next(ctx)
                     return
                 
+                # Kunci sample rate ke 48kHz (native Discord) + async resampling
+                # untuk mencegah audio ngebut saat terjadi keterlambatan baca disk (I/O lag)
+                ffmpeg_options = {
+                    'before_options': '-probesize 32 -analyzeduration 0',
+                    'options': '-vn -ar 48000 -ac 2 -af aresample=async=1:first_pts=0'
+                }
                 audio_source = discord.FFmpegPCMAudio(
                     source,
-                    options='-vn'
+                    **ffmpeg_options
                 )
 
                 print(vars(audio_source))
@@ -1097,7 +1106,8 @@ class Music(commands.Cog):
                 embed = self.get_now_playing_embed(guild_id)
                 view = NowPlayingView(self, ctx)
                 await ctx.send(embed=embed, view=view)
-                self.prefetch_queue(guild_id)
+                # Dikomentari: prefetch latar belakang memperebutkan akses disk (bottleneck I/O)
+                # self.prefetch_queue(guild_id)
                 
                 try:
                     await status_msg.delete()
@@ -1250,7 +1260,8 @@ class Music(commands.Cog):
         if not ctx.voice_client.is_playing() and not ctx.voice_client.is_paused():
             await self.play_next(ctx)
         else:
-            self.prefetch_queue(guild_id)
+            # Dikomentari: prefetch latar belakang memperebutkan akses disk (bottleneck I/O)
+            # self.prefetch_queue(guild_id)
             embed = discord.Embed(
                 title="✅ Added to Queue",
                 description=f"**[{song['title']}]({song['url']})**",
@@ -1291,7 +1302,8 @@ class Music(commands.Cog):
         if not ctx.voice_client.is_playing() and not ctx.voice_client.is_paused():
             await self.play_next(ctx)
         else:
-            self.prefetch_queue(guild_id)
+            # Dikomentari: prefetch latar belakang memperebutkan akses disk (bottleneck I/O)
+            # self.prefetch_queue(guild_id)
             embed = discord.Embed(
                 title="✅ Added to Queue",
                 description=f"**[{song['title']}]({song['url']})**",
