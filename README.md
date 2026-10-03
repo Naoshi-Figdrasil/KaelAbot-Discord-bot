@@ -61,7 +61,7 @@ Sebelum menjalankan bot, pastikan server atau komputer Anda telah memiliki:
 
 ### 1. Clone Repository & Masuk ke Direktori
 ```bash
-git clone https://github.com/AhmadF1kr1/KaelAbot-Discord-bot.git
+git clone https://github.com/Naoshi-Figdrasil/KaelAbot-Discord-bot.git
 cd KaelAbot-Discord-Bot
 ```
 
@@ -170,7 +170,3 @@ python main.py
 | `!rpg duel <@user>` | `/rpg duel <opponent>` | Menantang pemain lain untuk bertarung satu lawan satu (PVP) |
 
 ---
-
-## 📄 Lisensi
-
-Proyek ini dilisensikan di bawah **MIT License**. Silakan gunakan, modifikasi, dan distribusikan proyek ini secara bebas.
