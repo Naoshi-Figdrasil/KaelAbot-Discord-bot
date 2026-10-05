@@ -393,7 +393,7 @@ class Music(commands.Cog):
         
         # YouTube DL options
         self.ydl_opts = {
-            'format': 'bestaudio/best',
+            'format': 'bestaudio',
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
@@ -424,6 +424,11 @@ class Music(commands.Cog):
             # Batasi kecepatan unduh & fragment download agar I/O disk server tetap stabil
             'ratelimit': 800000,                # ~800 KB/s, mencegah bottleneck baca/tulis di VPS
             'concurrent_fragment_downloads': 1, # satu fragmen saja per waktu, hindari contention disk
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '128',
+            }],
         }
         
         # FFmpeg options
@@ -828,14 +833,14 @@ class Music(commands.Cog):
     def get_cached_audio_path(self, song):
         """Return an existing cached file for a song if one is available."""
         file_path = song.get('file_path')
-        if file_path and Path(file_path).exists():
+        if file_path and Path(file_path).suffix.lower() == '.mp3' and Path(file_path).exists():
             return file_path
 
         song_id = song.get('id')
         if song_id:
-            matches = list(self.cache_dir.glob(f"{song_id}.*"))
-            if matches:
-                path = str(matches[0])
+            path = self.cache_dir / f"{song_id}.mp3"
+            if path.exists():
+                path = str(path)
                 song['file_path'] = path
                 return path
 
@@ -866,13 +871,17 @@ class Music(commands.Cog):
                     return None
 
                 filename = ydl.prepare_filename(info)
-                path = Path(filename)
+                path = Path(filename).with_suffix('.mp3')
                 if not path.exists():
-                    matches = list(self.cache_dir.glob(f"{info.get('id')}.*"))
-                    path = matches[0] if matches else path
+                    raise FileNotFoundError(f"Converted MP3 was not created: {path}")
 
-                song['id'] = info.get('id', song.get('id'))
+                song_id = info.get('id', song.get('id'))
+                song['id'] = song_id
                 song['file_path'] = str(path)
+                if song_id:
+                    for cached_file in self.cache_dir.glob(f"{song_id}.*"):
+                        if cached_file != path:
+                            cached_file.unlink()
                 return str(path)
 
         task = asyncio.ensure_future(loop.run_in_executor(None, download))
