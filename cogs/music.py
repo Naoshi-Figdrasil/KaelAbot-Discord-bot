@@ -393,7 +393,6 @@ class Music(commands.Cog):
         
         # YouTube DL options
         self.ydl_opts = {
-            'format': 'bestaudio',
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
@@ -418,6 +417,7 @@ class Music(commands.Cog):
 
         self.download_ydl_opts = {
             **self.ydl_opts,
+            'format': 'bestaudio[abr<=128]/worstaudio/best[abr<=128]/worst',
             'default_search': None,
             'noplaylist': True,
             'outtmpl': str(self.cache_dir / '%(id)s.%(ext)s'),
